@@ -1,4 +1,4 @@
-# Static website 
+# Static website
 
 Module to create static website with S3 and CloudFront
 
@@ -44,7 +44,6 @@ No modules.
 | <a name="input_not-found-response-code"></a> [not-found-response-code](#input\_not-found-response-code) | The path of the custom error page (for example, /custom\_404.html). | `string` | `"200"` | no |
 | <a name="input_not-found-response-path"></a> [not-found-response-path](#input\_not-found-response-path) | The HTTP status code that you want CloudFront to return with the custom error page to the viewer. | `string` | `"/404.html"` | no |
 | <a name="input_price_class"></a> [price\_class](#input\_price\_class) | CloudFront price class | `string` | `"PriceClass_200"` | no |
-| <a name="input_region"></a> [region](#input\_region) | AWS Region | `string` | `"eu-central-1"` | no |
 | <a name="input_routing_rules"></a> [routing\_rules](#input\_routing\_rules) | n/a | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags map for resources | `map(string)` | `{}` | no |
 
