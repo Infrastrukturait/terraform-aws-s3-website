@@ -7,7 +7,7 @@ variable "bucket_name" {
   description = "The name of the S3 bucket to create."
 }
 
-variable "acm-certificate-arn" {
+variable "acm_certificate_arn" {
   type        = string
   default     = ""
 }
@@ -17,22 +17,22 @@ variable "routing_rules" {
   default     = ""
 }
 
-variable "default-root-object" {
+variable "default_root_object" {
   type        = string
   description = "The object that you want CloudFront to return (for example, index.html) when an end user requests the root URL."
   default     = "index.html"
 }
 
-variable "not-found-response-path" {
+variable "not_found_response_path" {
   type        = string
-  description = "The HTTP status code that you want CloudFront to return with the custom error page to the viewer."
+  description = "The path of the custom error page (for example, /custom_404.html)."
   default     = "/404.html"
 }
 
-variable "not-found-response-code" {
+variable "not_found_response_code" {
   type        = string
-  description = "The path of the custom error page (for example, /custom_404.html)."
-  default     = "200"
+  description = "The HTTP status code that you want CloudFront to return with the custom error page to the viewer."
+  default     = "404"
 }
 
 variable "block_public_acls" {

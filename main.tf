@@ -8,10 +8,15 @@ resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
 
 resource "aws_s3_bucket" "website_bucket" {
   bucket        = var.bucket_name
-  policy        = data.aws_iam_policy_document.s3_policy.json
 
   tags          = var.tags
 }
+
+resource "aws_s3_bucket_policy" "website_bucket" {
+  bucket = aws_s3_bucket.website_bucket.id
+  policy = data.aws_iam_policy_document.s3_policy.json
+}
+
 
 resource "aws_s3_bucket_public_access_block" "website_bucket_public_policy" {
   bucket = var.bucket_name
@@ -47,13 +52,13 @@ resource "aws_cloudfront_distribution" "website_cdn" {
     }
   }
 
-  default_root_object = var.default-root-object
+  default_root_object = var.default_root_object
 
   custom_error_response {
     error_code            = "404"
     error_caching_min_ttl = "360"
-    response_code         = var.not-found-response-code
-    response_page_path    = var.not-found-response-path
+    response_code         = var.not_found_response_code
+    response_page_path    = var.not_found_response_path
   }
 
   default_cache_behavior {
@@ -84,7 +89,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = var.acm-certificate-arn
+    acm_certificate_arn      = var.acm_certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = var.minimum_client_tls_protocol_version
   }
