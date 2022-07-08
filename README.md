@@ -57,6 +57,7 @@ No modules.
 | [aws_cloudfront_distribution.website_cdn](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution) | resource |
 | [aws_cloudfront_origin_access_identity.origin_access_identity](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_origin_access_identity) | resource |
 | [aws_s3_bucket.website_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket) | resource |
+| [aws_s3_bucket_policy.website_bucket](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_policy) | resource |
 | [aws_s3_bucket_public_access_block.website_bucket_public_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_public_access_block) | resource |
 | [aws_iam_policy_document.s3_policy](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/iam_policy_document) | data source |
 
@@ -64,16 +65,16 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_acm-certificate-arn"></a> [acm-certificate-arn](#input\_acm-certificate-arn) | n/a | `string` | `""` | no |
+| <a name="input_acm_certificate_arn"></a> [acm\_certificate\_arn](#input\_acm\_certificate\_arn) | n/a | `string` | `""` | no |
 | <a name="input_block_public_acls"></a> [block\_public\_acls](#input\_block\_public\_acls) | Enable block public ACLs on S3 bucket | `bool` | `true` | no |
 | <a name="input_block_public_policy"></a> [block\_public\_policy](#input\_block\_public\_policy) | Enable block public access on S3 bucket | `bool` | `true` | no |
 | <a name="input_bucket_name"></a> [bucket\_name](#input\_bucket\_name) | The name of the S3 bucket to create. | `string` | n/a | yes |
-| <a name="input_default-root-object"></a> [default-root-object](#input\_default-root-object) | The object that you want CloudFront to return (for example, index.html) when an end user requests the root URL. | `string` | `"index.html"` | no |
+| <a name="input_default_root_object"></a> [default\_root\_object](#input\_default\_root\_object) | The object that you want CloudFront to return (for example, index.html) when an end user requests the root URL. | `string` | `"index.html"` | no |
 | <a name="input_domain"></a> [domain](#input\_domain) | n/a | `string` | n/a | yes |
 | <a name="input_ipv6"></a> [ipv6](#input\_ipv6) | Enable IPv6 on CloudFront distribution | `bool` | `false` | no |
 | <a name="input_minimum_client_tls_protocol_version"></a> [minimum\_client\_tls\_protocol\_version](#input\_minimum\_client\_tls\_protocol\_version) | CloudFront viewer certificate minimum protocol version | `string` | `"TLSv1.2_2021"` | no |
-| <a name="input_not-found-response-code"></a> [not-found-response-code](#input\_not-found-response-code) | The path of the custom error page (for example, /custom\_404.html). | `string` | `"200"` | no |
-| <a name="input_not-found-response-path"></a> [not-found-response-path](#input\_not-found-response-path) | The HTTP status code that you want CloudFront to return with the custom error page to the viewer. | `string` | `"/404.html"` | no |
+| <a name="input_not_found_response_code"></a> [not\_found\_response\_code](#input\_not\_found\_response\_code) | The HTTP status code that you want CloudFront to return with the custom error page to the viewer. | `string` | `"404"` | no |
+| <a name="input_not_found_response_path"></a> [not\_found\_response\_path](#input\_not\_found\_response\_path) | The path of the custom error page (for example, /custom\_404.html). | `string` | `"/404.html"` | no |
 | <a name="input_price_class"></a> [price\_class](#input\_price\_class) | CloudFront price class | `string` | `"PriceClass_200"` | no |
 | <a name="input_routing_rules"></a> [routing\_rules](#input\_routing\_rules) | n/a | `string` | `""` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags map for resources | `map(string)` | `{}` | no |
@@ -92,6 +93,39 @@ No modules.
 ### Examples
 
 ```hcl
+module "app_static_website_label" {
+  source   = "cloudposse/label/null"
+  version = "v0.25.0"
 
+  namespace  = "app"
+  stage      = "prod"
+  name       = "${var.name}"
+  delimiter  = "-"
+
+  tags = {
+    "Domain"       = "${var.domain}",
+    "BusinessUnit" = "XYZ",
+    "Snapshot"     = "true"
+  }
+}
+
+resource "aws_acm_certificate" "cert" {
+  domain_name       = "${var.domain}"
+  validation_method = "DNS"
+
+  tags = module.app_static_website_label.tags  
+
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+module "app_static_website" {
+  source               = "../../"
+  domain               = "${var.domain}"
+  acm_certificate_arn  = aws_acm_certificate.cert.arn
+  bucket_name          = join(module.app_static_website_label.delimiter, [module.app_static_website_label.namespace, module.app_static_website_label.stage, var.name, "origin"])
+  tags                 = module.app_static_website_label.tags
+}
 ```
 <!-- END_TF_DOCS -->
