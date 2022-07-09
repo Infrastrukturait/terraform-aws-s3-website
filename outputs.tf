@@ -15,9 +15,9 @@ output "website_cdn_zone_id" {
 }
 
 output "website_bucket_id" {
-  value       = aws_s3_bucket.website_bucket.id
+  value       = module.website_bucket.id
 }
 
 output "website_bucket_arn" {
-  value       = aws_s3_bucket.website_bucket.arn
+  value       = module.website_bucket.arn
 }
