@@ -1,28 +1,21 @@
 locals {
-  s3_origin_id = "origin-bucket-${aws_s3_bucket.website_bucket.id}"
+  s3_origin_id = "origin-bucket-${module.website_bucket.id}"
   bucket_arn  = "arn:aws:s3:::${var.bucket_name}"
 }
 
 resource "aws_cloudfront_origin_access_identity" "origin_access_identity" {
 }
 
-resource "aws_s3_bucket" "website_bucket" {
-  bucket        = var.bucket_name
+module "website_bucket" {
+  source              = "Infrastrukturait/s3-bucket/aws"
+  version             = "0.1.0"
 
-  tags          = var.tags
-}
-
-resource "aws_s3_bucket_policy" "website_bucket" {
-  bucket = aws_s3_bucket.website_bucket.id
-  policy = data.aws_iam_policy_document.s3_policy.json
-}
-
-
-resource "aws_s3_bucket_public_access_block" "website_bucket_public_policy" {
-  bucket = var.bucket_name
-
+  bucket_name         = var.bucket_name
+  bucket_policy       = data.aws_iam_policy_document.s3_policy.json
   block_public_acls   = var.block_public_acls
   block_public_policy = var.block_public_policy
+
+  tags                = var.tags
 }
 
 data "aws_iam_policy_document" "s3_policy" {
@@ -45,7 +38,7 @@ resource "aws_cloudfront_distribution" "website_cdn" {
 
   origin {
     origin_id   = local.s3_origin_id
-    domain_name = aws_s3_bucket.website_bucket.bucket_regional_domain_name
+    domain_name = module.website_bucket.bucket_regional_domain_name
 
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.origin_access_identity.cloudfront_access_identity_path
